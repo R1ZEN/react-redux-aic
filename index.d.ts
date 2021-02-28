@@ -1,4 +1,4 @@
-export type AicProvider = import('react').FC;
+export type AicProvider = import('react').ReactElement;
 
 export function useAicSelector<
   TState,

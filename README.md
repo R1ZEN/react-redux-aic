@@ -65,26 +65,29 @@ import { AicProvider } from 'react-redux-aic';
 
 ```jsx
 import React from 'react';
+import ReactDOM from 'react-dom';
 import { createStore } from 'redux';
-import { useDispatch, Provider } from 'react-redux';
-import { useAicSelector } from 'react-redux-aic';
+import { Provider } from 'react-redux';
+import { useAicSelector } from '@pbe/react-redux-aic';
 
-const reducer = (state = {}, action) => ({...state, ...action.state});
+const reducer = (state = {}, action) => ({ ...state, ...action.state });
 const store = createStore(reducer);
 
-const getPost = async ({postId}) => {
-  const post = await fetch(`/api/post/${postId}`).then((res) => res.json());
-  store.dispatch({state: {post}});
-}
+const getPost = async ({ postId }) => {
+  const post = await fetch(`/api/post/${postId}.json`).then((res) =>
+    res.json()
+  );
+  store.dispatch({ type: '', state: { post } });
+};
 
 const usePostSelector = (field, postId) => {
   return useAicSelector(
     (state) => state.post && state.post[field],
     (state) => state.post,
     getPost,
-    {postId}
+    { postId }
   );
-}
+};
 
 const PostTitle = () => {
   const postId = 123;
@@ -94,16 +97,18 @@ const PostTitle = () => {
     return <p>Loading...</p>;
   }
 
-  return <h1>Post: {title}</h1>
-}
+  return <h1>Post: {title}</h1>;
+};
 
 ReactDOM.render(
-    <Provider store={store}>
-      <PostTitle/>
-    </Provider>,
-    document.body
+  <Provider store={store}>
+    <PostTitle />
+  </Provider>,
+  document.body
 );
 ```
+
+[![Edit react-redux-aic-demo](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/react-redux-aic-demo-t3u5z?fontsize=14&hidenavigation=1&theme=dark)
 
 ## Dependencies
 
