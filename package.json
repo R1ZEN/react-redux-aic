@@ -1,6 +1,6 @@
 {
   "name": "@pbe/react-redux-aic",
-  "version": "1.0.4",
+  "version": "1.0.6",
   "license": "MIT",
   "private": false,
   "description": "Wrapper for redux useSelector that allows automatically initialize component with server data",

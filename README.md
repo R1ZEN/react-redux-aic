@@ -22,9 +22,10 @@ To solve this problem, it was decided to make a hook that would link data and re
 
 ## API
 
-- [useAicSelector](###useaicselector)
-- [useAicInProgress](###useaicinprogress)
-- [AicProvider](###aicprovider)
+- [useAicSelector](#useaicselector)
+- [useAicThunkSelector](#useaicthunkselector)
+- [useAicInProgress](#useaicinprogress)
+- [AicProvider](#aicprovider)
 
 ### useAicSelector
 
@@ -37,6 +38,14 @@ const value = useAicSelector(selector, triggerSelector, callback, callbackParams
 - `triggerSelector` - If triggerSelector returned `undefined` when mounting the component, a callback will be called;
 - `callback` - functions that take the first argument of the callbackParam object, required for asynchronous requests to the north and update the redux store;
 - `callbackParams` - an object passed to callback as the first argument
+
+### useAicThunkSelector
+
+Same as `useAicSelector` but with `thunk` instead of callback.
+
+```js
+const value = useAicThunkSelector(selector, triggerSelector, thunk, thunkParams);
+```
 
 ### useAicInProgress
 
@@ -66,22 +75,25 @@ import { AicProvider } from 'react-redux-aic';
 ```jsx
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { createStore } from 'redux';
+import { applyMiddleware, createStore } from 'redux';
 import { Provider } from 'react-redux';
-import { useAicSelector } from '@pbe/react-redux-aic';
+import { useAicThunkSelector } from '@pbe/react-redux-aic';
+import thunk from 'redux-thunk';
 
 const reducer = (state = {}, action) => ({ ...state, ...action.state });
-const store = createStore(reducer);
+const store = createStore(reducer, applyMiddleware(thunk));
 
-const getPost = async ({ postId }) => {
-  const post = await fetch(`/api/post/${postId}.json`).then((res) =>
-    res.json()
-  );
-  store.dispatch({ type: '', state: { post } });
+const getPost = ({ postId }) => {
+  return async (dispatch) => {
+    const post = await fetch(`/api/post/${postId}.json`).then((res) =>
+      res.json()
+    );
+    dispatch({ type: '', state: { post } });
+  };
 };
 
 const usePostSelector = (field, postId) => {
-  return useAicSelector(
+  return useAicThunkSelector(
     (state) => state.post && state.post[field],
     (state) => state.post,
     getPost,
@@ -92,12 +104,18 @@ const usePostSelector = (field, postId) => {
 const PostTitle = () => {
   const postId = 123;
   const title = usePostSelector('title', postId);
+  const author = usePostSelector('author', postId);
 
   if (title === undefined) {
     return <p>Loading...</p>;
   }
 
-  return <h1>Post: {title}</h1>;
+  return (
+    <div>
+      <h1>Post: {title}</h1>
+      <strong>Author: {author}</strong>
+    </div>
+  );
 };
 
 ReactDOM.render(
