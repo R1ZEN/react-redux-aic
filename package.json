@@ -1,0 +1,72 @@
+{
+  "name": "react-redux-aic",
+  "version": "1.0.0",
+  "license": "MIT",
+  "description": "Wrapper for redux useSelector that allows automatically initialize component with server data",
+  "author": "Pavel Bely",
+  "contributors": [
+    "Pavel Bely"
+  ],
+  "bugs": {
+    "url": "https://github.com/R1ZEN/react-redux-aic/issues"
+  },
+  "homepage": "https://github.com/R1ZEN/react-redux-aic.git",
+  "repository": {
+    "url": "https://github.com/R1ZEN/react-redux-aic.git",
+    "type": "git"
+  },
+  "keywords": [
+    "react",
+    "redux",
+    "initializer",
+    "api"
+  ],
+  "files": [
+    "dist/",
+    "index.d.ts",
+    "LICENSE",
+    "README.md"
+  ],
+  "main": "dist/react-redux-aic.js",
+  "module": "dist/react-redux-aic.es.js",
+  "typings": "index.d.ts",
+  "sideEffects": false,
+  "scripts": {
+    "dev": "NODE_ENV=development rollup -cw",
+    "build": "NODE_ENV=production rollup -c",
+    "test": "jest"
+  },
+  "peerDependencies": {
+    "react": "^17.0.1",
+    "react-redux": "^7.2.2",
+    "redux": "^4.0.5"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.13.8",
+    "@babel/plugin-transform-typescript": "^7.13.0",
+    "@babel/preset-env": "^7.13.8",
+    "@babel/preset-react": "^7.12.13",
+    "@babel/preset-typescript": "^7.13.0",
+    "@rollup/plugin-babel": "^5.3.0",
+    "@rollup/plugin-commonjs": "^17.1.0",
+    "@rollup/plugin-node-resolve": "^11.2.0",
+    "@testing-library/react": "^11.2.5",
+    "@testing-library/react-hooks": "^5.0.3",
+    "@types/jest": "^26.0.20",
+    "@types/react": "^17.0.2",
+    "@types/react-redux": "^7.1.16",
+    "@types/redux": "^3.6.0",
+    "jest": "^26.6.3",
+    "prettier": "^2.2.1",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "react-redux": "^7.2.2",
+    "react-test-renderer": "^17.0.1",
+    "redux": "^4.0.5",
+    "rollup": "^2.40.0",
+    "rollup-plugin-filesize": "^9.1.0",
+    "rollup-plugin-terser": "^7.0.2",
+    "ts-jest": "^26.5.2",
+    "typescript": "^4.2.2"
+  }
+}
