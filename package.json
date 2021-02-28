@@ -1,7 +1,8 @@
 {
-  "name": "react-redux-aic",
+  "name": "@pbe/react-redux-aic",
   "version": "1.0.0",
   "license": "MIT",
+  "private": false,
   "description": "Wrapper for redux useSelector that allows automatically initialize component with server data",
   "author": "Pavel Bely",
   "contributors": [
@@ -27,8 +28,8 @@
     "LICENSE",
     "README.md"
   ],
-  "main": "dist/react-redux-aic.js",
-  "module": "dist/react-redux-aic.es.js",
+  "main": "dist/@pbe/react-redux-aic.min.js",
+  "module": "dist/@pbe/react-redux-aic.es.min.js",
   "typings": "index.d.ts",
   "sideEffects": false,
   "scripts": {

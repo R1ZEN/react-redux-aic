@@ -1,4 +1,4 @@
-# react-redux-aic (Auto initializing component)
+# react-redux-aic
 
 ## Install
 
