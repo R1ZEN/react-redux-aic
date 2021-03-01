@@ -1,4 +1,6 @@
-export type AicProvider = import('react').ReactElement;
+import type { ComponentType, ReactElement } from 'react';
+
+export type AicProvider = ReactElement;
 
 export function useAicSelector<
   TState,
@@ -27,3 +29,8 @@ export function useAicThunkSelector<
 ): TSelected;
 
 export function useAicInProgress(): boolean;
+
+export function collectAicServerStore<S extends { dispatch: Function }>(
+  Component: ComponentType,
+  store: S
+): Promise<void>;
