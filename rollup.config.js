@@ -17,7 +17,7 @@ export default {
     { file: `${destBase}${destExtension}`, format: 'cjs' },
     { file: `${destBase}.es${destExtension}`, format: 'es' },
   ],
-  external: Object.keys(pkg.peerDependencies),
+  external: Object.keys(pkg.peerDependencies).concat(['react-dom/server']),
   plugins: [
     resolve({ extensions }),
     babel({
