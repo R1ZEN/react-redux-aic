@@ -1,11 +1,12 @@
 import { useContext, useEffect, useRef } from 'react';
-import { useSelector, useStore } from 'react-redux';
+import { shallowEqual, useSelector, useStore } from 'react-redux';
 import { AicCallbackCollectorContext } from './context/aic-callback-collector-context';
 import { AicInProgressContext } from './context/aic-in-progress-context';
 import { validateParamsConsistency } from './utils/validate-params-consistency';
-import { promiseClosureRef } from './promise-closure-ref';
-import { activeEffectClosureRef } from './active-effect-closure-ref';
-import { inProgressSetClosureRef } from './in-progress-set-closure-ref';
+import { promiseQueueClosureRef } from './refs/promise-queue-closure-ref';
+import { activeEffectClosureRef } from './refs/active-effect-closure-ref';
+import { inProgressSetClosureRef } from './refs/in-progress-set-closure-ref';
+import { inProgressCountClosureRef } from './refs/in-progress-count-closure-ref';
 
 export const useAicSelector = <
   TState,
@@ -23,6 +24,7 @@ export const useAicSelector = <
   const { setInProgress } = useContext(AicInProgressContext);
   const store = useStore();
   const value = useSelector(selector);
+  const prevCallbackParams = useRef(null);
   const markInitializedRef = useRef(false);
   const triggerValue = callbackTriggerSelector(store.getState());
 
@@ -42,6 +44,44 @@ export const useAicSelector = <
     collectorMap.set(callback, callbackParams);
   }
 
+  // Params updates
+  useEffect(() => {
+    if (prevCallbackParams.current === null) {
+      prevCallbackParams.current = callbackParams;
+
+      return;
+    }
+
+    if (!shallowEqual(callbackParams, prevCallbackParams.current)) {
+      prevCallbackParams.current = callbackParams;
+      inProgressCountClosureRef.current += 1;
+
+      promiseQueueClosureRef.current = promiseQueueClosureRef.current.then(
+        () => {
+          if (triggerValue === undefined) {
+            inProgressSetClosureRef.current.add(callback);
+
+            return Promise.resolve(callback(callbackParams)).then(() => {
+              inProgressSetClosureRef.current.delete(callback);
+              inProgressCountClosureRef.current -= 1;
+            });
+          }
+        }
+      );
+
+      promiseQueueClosureRef.current = promiseQueueClosureRef.current.then(
+        () => {
+          if (!inProgressCountClosureRef.current) {
+            setInProgress(false);
+          }
+
+          return Promise.resolve();
+        }
+      );
+    }
+  }, [triggerValue, callbackParams, prevCallbackParams.current]);
+
+  // Initial requests
   useEffect(() => {
     if (markInitializedRef.current) {
       return;
@@ -55,7 +95,7 @@ export const useAicSelector = <
 
     activeEffectClosureRef.current = undefined;
 
-    if (!inProgressSetClosureRef.current.size) {
+    if (!inProgressCountClosureRef.current) {
       setInProgress(true);
     }
 
@@ -64,33 +104,25 @@ export const useAicSelector = <
       ([callback, params]) => {
         inProgressSetClosureRef.current.add(callback);
 
+        inProgressCountClosureRef.current += 1;
         return Promise.resolve(callback(params)).then(() => {
           inProgressSetClosureRef.current.delete(callback);
+          inProgressCountClosureRef.current -= 1;
         });
       }
     );
 
     // Append new promises to in progress promises
-    promiseClosureRef.current = promiseClosureRef.current
+    promiseQueueClosureRef.current = promiseQueueClosureRef.current
       .then(() => Promise.all(collectedPromises))
       .then(() => {
-        if (!inProgressSetClosureRef.current.size) {
+        if (!inProgressCountClosureRef.current) {
           setInProgress(false);
         }
-
-        return Promise.resolve();
       });
 
     collectorMap.clear();
-  }, [
-    activeEffectClosureRef.current,
-    inProgressSetClosureRef.current.size,
-    promiseClosureRef.current,
-    markInitializedRef.current,
-    setInProgress,
-    callback,
-    collectorMap,
-  ]);
+  }, [markInitializedRef.current, setInProgress, callback, collectorMap]);
 
   return value;
 };

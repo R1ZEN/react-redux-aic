@@ -5,11 +5,11 @@
 Install from the NPM repository using yarn or npm:
 
 ```shell
-yarn add react-redux-aic
+yarn add --dev @pbe/react-redux-aic
 ```
 
 ```shell
-npm install react-redux-aic
+npm install -D @pbe/react-redux-aic
 ```
 
 ## Motivation
@@ -22,10 +22,16 @@ To solve this problem, it was decided to make a hook that would link data and re
 
 ## API
 
-- [useAicSelector](#useaicselector)
-- [useAicThunkSelector](#useaicthunkselector)
-- [useAicInProgress](#useaicinprogress)
-- [AicProvider](#aicprovider)
+- [Hooks](#hooks)
+  - [useAicSelector](#useaicselector)
+  - [useAicThunkSelector](#useaicthunkselector)
+  - [useAicInProgress](#useaicinprogress)
+- [Components](#components)
+  - [AicProvider](#aicprovider)
+- [ServerSide](#serverside)
+  - [collectAicServerStore](#collectaicserverstore)
+
+## Hooks
 
 ### useAicSelector
 
@@ -57,18 +63,33 @@ Hook that lets you know if the aic is currently working.
 const inProgress = useAicInProgress();
 ```
 
+## Components
+
 ### AicProvider
 
 Allows you to know when the aic starts and stops working.
 
 ```jsx
-import { AicProvider } from 'react-redux-aic';
+import { AicProvider } from '@pbe/react-redux-aic';
 
 // ...
 <AicProvider>
   <Component />
 </AicProvider>
 ```
+
+## ServerSide
+
+### collectAicServerStore
+
+Allows you to automatically collect the redux store on the server side.
+
+```js
+await collectAicServerStore(RootComponent, store);
+```
+- `RootComponent` - component tree contains `useAicSelector` or `useAicThunkSelector` hooks;
+- `store` - redux store that needs to be initialized;
+
 
 ## Example
 

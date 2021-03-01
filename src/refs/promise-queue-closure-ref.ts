@@ -1,5 +1,5 @@
 import { MutableRefObject } from 'react';
 
-export const promiseClosureRef: MutableRefObject<PromiseLike<any>> = {
+export const promiseQueueClosureRef: MutableRefObject<PromiseLike<any>> = {
   current: Promise.resolve(),
 };

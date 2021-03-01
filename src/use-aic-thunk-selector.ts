@@ -16,7 +16,7 @@ export const useAicThunkSelector = (
   if (cbToThunkMap.has(callback)) {
     cb = cbToThunkMap.get(callback);
   } else {
-    cb = (...args) => dispatch(callback(...args));
+    cb = (params) => dispatch(callback(params));
     cbToThunkMap.set(callback, cb);
   }
 

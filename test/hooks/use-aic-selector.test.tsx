@@ -4,9 +4,9 @@ import { Provider as ProviderMock } from 'react-redux';
 import * as hooks from '@testing-library/react-hooks';
 import * as rtl from '@testing-library/react';
 import { AicProvider, useAicSelector } from '../../src';
-import { promiseClosureRef } from '../../src/promise-closure-ref';
-import { activeEffectClosureRef } from '../../src/active-effect-closure-ref';
-import { inProgressSetClosureRef } from '../../src/in-progress-set-closure-ref';
+import { promiseQueueClosureRef } from '../../src/refs/promise-queue-closure-ref';
+import { activeEffectClosureRef } from '../../src/refs/active-effect-closure-ref';
+import { inProgressSetClosureRef } from '../../src/refs/in-progress-set-closure-ref';
 
 const identity = (s: any) => s;
 const undefinedTriggerSelector = () => undefined;
@@ -26,7 +26,7 @@ describe('useAicSelector', () => {
   beforeEach(() => {
     store = createStore(baseReducer);
     activeEffectClosureRef.current = undefined;
-    promiseClosureRef.current = Promise.resolve();
+    promiseQueueClosureRef.current = Promise.resolve();
     inProgressSetClosureRef.current = new Set();
   });
 
@@ -80,7 +80,7 @@ describe('useAicSelector', () => {
           { wrapper: createWrapper(store) }
         );
 
-        await promiseClosureRef.current;
+        await promiseQueueClosureRef.current;
       });
 
       expect(callback).toHaveBeenCalledWith(params);
@@ -102,7 +102,7 @@ describe('useAicSelector', () => {
           wrapper: createWrapper(store),
         });
 
-        await promiseClosureRef.current;
+        await promiseQueueClosureRef.current;
       });
 
       expect(callback).toBeCalledTimes(1);
@@ -120,7 +120,7 @@ describe('useAicSelector', () => {
           }
         );
 
-        await promiseClosureRef.current;
+        await promiseQueueClosureRef.current;
       });
 
       expect(callback).toHaveBeenCalledTimes(1);
@@ -137,7 +137,7 @@ describe('useAicSelector', () => {
           { wrapper: createWrapper(store) }
         );
 
-        await promiseClosureRef.current;
+        await promiseQueueClosureRef.current;
       });
 
       expect(callback).toHaveBeenCalledTimes(0);
@@ -176,7 +176,7 @@ describe('useAicSelector', () => {
           wrapper: createWrapper(store),
         });
 
-        await promiseClosureRef.current;
+        await promiseQueueClosureRef.current;
       });
 
       expect(callback1).toBeCalledTimes(1);
@@ -223,12 +223,45 @@ describe('useAicSelector', () => {
           wrapper: createWrapper(store),
         });
 
-        await promiseClosureRef.current;
+        await promiseQueueClosureRef.current;
       });
 
       expect(callback1).toBeCalledTimes(1);
       expect(callback2).toBeCalledTimes(1);
       expect(callback3).toBeCalledTimes(1);
+    });
+
+    it('should call the next initializer in the current component if the parameter data has been updated', async () => {
+      const callback1 = jest.fn(() => {
+        // TODO: Figure out why this is 1 but callback called once
+        store.getState().count = 0;
+        store.dispatch({ type: '' });
+      });
+      const callback2 = jest.fn();
+
+      const MockCmp = () => {
+        const count = useAicSelector(
+          identity,
+          undefinedTriggerSelector,
+          callback1,
+          {}
+        );
+        useAicSelector(identity, undefinedTriggerSelector, callback2, {
+          count
+        });
+
+        return <div />;
+      };
+
+      await rtl.act(async () => {
+        rtl.render(<MockCmp />, {
+          wrapper: createWrapper(store),
+        });
+
+        await promiseQueueClosureRef.current;
+      });
+
+      expect(callback2).toBeCalledTimes(2);
     });
   });
 
