@@ -1,6 +1,6 @@
 {
   "name": "@pbe/react-redux-aic",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "license": "MIT",
   "private": false,
   "description": "Wrapper for redux useSelector that allows automatically initialize component with server data",
@@ -47,6 +47,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.13.8",
+    "@babel/plugin-transform-runtime": "^7.13.8",
     "@babel/plugin-transform-typescript": "^7.13.0",
     "@babel/preset-env": "^7.13.8",
     "@babel/preset-react": "^7.12.13",

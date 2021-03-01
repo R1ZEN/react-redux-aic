@@ -22,7 +22,7 @@ export default {
     resolve({ extensions }),
     babel({
       extensions,
-      babelHelpers: 'bundled',
+      babelHelpers: 'runtime',
       include: ['src/**/*'],
     }),
     isProduction && terser(),
