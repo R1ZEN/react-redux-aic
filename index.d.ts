@@ -1,4 +1,5 @@
-import type { IAicServerOptions } from './src/utils/collect-aic-server-store';
+import React from 'react';
+import { Store } from 'redux';
 
 export function useAicSelector<
   TState,
@@ -27,6 +28,11 @@ export function useAicThunkSelector<
 ): TSelected;
 
 export function useAicInProgress(): boolean;
+
+interface IAicServerOptions {
+  store: Store;
+  render: () => React.ReactElement;
+}
 
 export function collectAicServerStore(
   options: IAicServerOptions

@@ -7,7 +7,7 @@ import { RequestQueue } from '../request-queue';
 
 const MAX_DEEP_REQUEST = 10;
 
-export interface IAicServerOptions {
+interface IAicServerOptions {
   store: Store;
   render: () => React.ReactElement;
 }
