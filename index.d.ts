@@ -1,6 +1,4 @@
-import type { ReactElement } from 'react';
-
-export type AicProvider = ReactElement;
+import type { IAicServerOptions } from './src/utils/collect-aic-server-store';
 
 export function useAicSelector<
   TState,
@@ -30,7 +28,6 @@ export function useAicThunkSelector<
 
 export function useAicInProgress(): boolean;
 
-export function collectAicServerStore<S extends { dispatch: Function }>(
-  store: S,
-  renderCallback: (store: S) => ReactElement,
+export function collectAicServerStore(
+  options: IAicServerOptions
 ): Promise<void>;
