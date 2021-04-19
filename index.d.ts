@@ -1,4 +1,4 @@
-import type { ComponentType, ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 export type AicProvider = ReactElement;
 
@@ -31,6 +31,6 @@ export function useAicThunkSelector<
 export function useAicInProgress(): boolean;
 
 export function collectAicServerStore<S extends { dispatch: Function }>(
-  Component: ComponentType,
-  store: S
+  store: S,
+  renderCallback: (store: S) => ReactElement,
 ): Promise<void>;

@@ -1,16 +1,16 @@
-import { useContext } from 'react';
-import { AicInProgressContext } from './context/aic-in-progress-context';
+import { useState } from 'react';
+import { aicStore } from './utils/aic-store';
 
 export const useAicInProgress = () => {
-  const { inProgress } = useContext(AicInProgressContext);
+  const [inProgress, setInProgress] = useState(false);
 
-  if (inProgress === undefined) {
-    console.warn(
-      'useAicInProgress: You need wrap Root component with <AicProvider>'
-    );
+  aicStore.subscribe(() => {
+    const state = aicStore.getState();
 
-    return false;
-  }
+    if (state.aicInProgress !== inProgress) {
+      setInProgress(state.aicInProgress);
+    }
+  });
 
   return inProgress;
 };

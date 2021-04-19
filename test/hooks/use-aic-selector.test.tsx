@@ -1,12 +1,11 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { createStore } from 'redux';
 import { Provider as ProviderMock } from 'react-redux';
 import * as hooks from '@testing-library/react-hooks';
 import * as rtl from '@testing-library/react';
-import { AicProvider, useAicSelector } from '../../src';
-import { promiseQueueClosureRef } from '../../src/refs/promise-queue-closure-ref';
-import { activeEffectClosureRef } from '../../src/refs/active-effect-closure-ref';
-import { inProgressSetClosureRef } from '../../src/refs/in-progress-set-closure-ref';
+import { useAicSelector } from '../../src/use-aic-selector';
+import { AicRequestQueueContext } from '../../src/context/aic-request-queue-context';
+import { RequestQueue } from '../../src/request-queue';
 
 const identity = (s: any) => s;
 const undefinedTriggerSelector = () => undefined;
@@ -14,20 +13,19 @@ const baseReducer = ({ count }: any = { count: -1 }) => ({
   count: count + 1,
 });
 
-const createWrapper = (store) => (props) => (
-  <AicProvider>
+const createWrapper = (store, requestQueue: RequestQueue) => (props) => (
+  <AicRequestQueueContext.Provider value={requestQueue}>
     <ProviderMock {...props} store={store} />
-  </AicProvider>
+  </AicRequestQueueContext.Provider>
 );
 
 describe('useAicSelector', () => {
   let store;
+  let requestQueue: RequestQueue;
 
   beforeEach(() => {
     store = createStore(baseReducer);
-    activeEffectClosureRef.current = undefined;
-    promiseQueueClosureRef.current = Promise.resolve();
-    inProgressSetClosureRef.current = new Set();
+    requestQueue = new RequestQueue();
   });
 
   afterEach(() => {
@@ -77,10 +75,10 @@ describe('useAicSelector', () => {
               callback,
               params
             ),
-          { wrapper: createWrapper(store) }
+          { wrapper: createWrapper(store, requestQueue) }
         );
 
-        await promiseQueueClosureRef.current;
+        await requestQueue.promiseQueue;
       });
 
       expect(callback).toHaveBeenCalledWith(params);
@@ -99,10 +97,10 @@ describe('useAicSelector', () => {
 
       await rtl.act(async () => {
         rtl.render(<MockCmp />, {
-          wrapper: createWrapper(store),
+          wrapper: createWrapper(store, requestQueue),
         });
 
-        await promiseQueueClosureRef.current;
+        await requestQueue.promiseQueue;
       });
 
       expect(callback).toBeCalledTimes(1);
@@ -116,11 +114,11 @@ describe('useAicSelector', () => {
           () =>
             useAicSelector(identity, undefinedTriggerSelector, callback, {}),
           {
-            wrapper: createWrapper(store),
+            wrapper: createWrapper(store, requestQueue),
           }
         );
 
-        await promiseQueueClosureRef.current;
+        await requestQueue.promiseQueue;
       });
 
       expect(callback).toHaveBeenCalledTimes(1);
@@ -134,10 +132,10 @@ describe('useAicSelector', () => {
       await hooks.act(async () => {
         hooks.renderHook(
           () => useAicSelector(identity, triggerSelector, callback, params),
-          { wrapper: createWrapper(store) }
+          { wrapper: createWrapper(store, requestQueue) }
         );
 
-        await promiseQueueClosureRef.current;
+        await requestQueue.promiseQueue;
       });
 
       expect(callback).toHaveBeenCalledTimes(0);
@@ -159,7 +157,7 @@ describe('useAicSelector', () => {
       const MockCmp2 = () => {
         const count = useAicSelector(
           selector,
-          undefinedTriggerSelector,
+          (store) => store.count === 1 ? true : undefined,
           callback1,
           {}
         );
@@ -173,10 +171,10 @@ describe('useAicSelector', () => {
 
       await rtl.act(async () => {
         rtl.render(<MockCmp2 />, {
-          wrapper: createWrapper(store),
+          wrapper: createWrapper(store, requestQueue),
         });
 
-        await promiseQueueClosureRef.current;
+        await requestQueue.promiseQueue;
       });
 
       expect(callback1).toBeCalledTimes(1);
@@ -220,15 +218,45 @@ describe('useAicSelector', () => {
 
       await rtl.act(async () => {
         rtl.render(<MockCmp2 />, {
-          wrapper: createWrapper(store),
+          wrapper: createWrapper(store, requestQueue),
         });
 
-        await promiseQueueClosureRef.current;
+        await requestQueue.promiseQueue;
       });
 
       expect(callback1).toBeCalledTimes(1);
       expect(callback2).toBeCalledTimes(1);
       expect(callback3).toBeCalledTimes(1);
+    });
+
+    it('should call callback when selector value changed and triggerSelector return undefined', async () => {
+      const cb1 = jest.fn();
+      const selector = (state) => state.count;
+      let renderCount = 0;
+
+      const MockCmp = () => {
+        const count = useAicSelector(selector, undefinedTriggerSelector, cb1, {});
+        renderCount += 1;
+
+        return <div />
+      };
+
+      await rtl.act(async () => {
+        rtl.render(<MockCmp />, {
+          wrapper: createWrapper(store, requestQueue),
+        });
+
+        await requestQueue.promiseQueue;
+      });
+
+      await rtl.act(async () => {
+        store.dispatch({ type: '' });
+
+        await requestQueue.promiseQueue;
+      });
+
+      expect(renderCount).toBe(2);
+      expect(cb1).toBeCalledTimes(2);
     });
 
     it('should call the next initializer in the current component if the parameter data has been updated', async () => {
@@ -237,17 +265,19 @@ describe('useAicSelector', () => {
         store.getState().count = 0;
         store.dispatch({ type: '' });
       });
-      const callback2 = jest.fn();
+      const selector = (state) => state.count;
+      const cbArgs = []
+      const callback2 = jest.fn((arg) => cbArgs.push(arg));
 
       const MockCmp = () => {
         const count = useAicSelector(
-          identity,
+          selector,
           undefinedTriggerSelector,
           callback1,
           {}
         );
         useAicSelector(identity, undefinedTriggerSelector, callback2, {
-          count
+          count,
         });
 
         return <div />;
@@ -255,34 +285,15 @@ describe('useAicSelector', () => {
 
       await rtl.act(async () => {
         rtl.render(<MockCmp />, {
-          wrapper: createWrapper(store),
+          wrapper: createWrapper(store, requestQueue),
         });
 
-        await promiseQueueClosureRef.current;
+        await requestQueue.promiseQueue;
       });
 
       expect(callback2).toBeCalledTimes(2);
-    });
-  });
-
-  describe('validation', () => {
-    it('should throw consistency error if same callback calling with different params', () => {
-      const callback = jest.fn();
-      const params1 = { foo: 'bar' };
-      const params2 = { bar: 'foo' };
-
-      const MockCmp = () => {
-        useAicSelector(identity, undefinedTriggerSelector, callback, params1);
-        useAicSelector(identity, undefinedTriggerSelector, callback, params2);
-
-        return <div />;
-      };
-
-      spyOn(console, 'error');
-
-      expect(() => {
-        rtl.render(<MockCmp />, { wrapper: createWrapper(store) });
-      }).toThrowError(/^useAicSelector:\sConsistency\serror\./);
+      expect(cbArgs.length).toBe(2);
+      expect(cbArgs[1]).toEqual({ count: 1 })
     });
   });
 });

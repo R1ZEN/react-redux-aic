@@ -1,5 +1,7 @@
 # react-redux-aic
 
+Wrapper for redux `useSelector` that allows automatically initialize component with server data.
+
 ## Install
 
 Install from the NPM repository using yarn or npm:
@@ -26,10 +28,6 @@ To solve this problem, it was decided to make a hook that would link data and re
   - [useAicSelector](#useaicselector)
   - [useAicThunkSelector](#useaicthunkselector)
   - [useAicInProgress](#useaicinprogress)
-- [Components](#components)
-  - [AicProvider](#aicprovider)
-- [ServerSide](#serverside)
-  - [collectAicServerStore](#collectaicserverstore)
 
 ## Hooks
 
@@ -57,39 +55,9 @@ const value = useAicThunkSelector(selector, triggerSelector, thunk, thunkParams)
 
 Hook that lets you know if the aic is currently working.
 
-> Note: Using only with AicProvider
-
 ```js
 const inProgress = useAicInProgress();
 ```
-
-## Components
-
-### AicProvider
-
-Allows you to know when the aic starts and stops working.
-
-```jsx
-import { AicProvider } from '@pbe/react-redux-aic';
-
-// ...
-<AicProvider>
-  <Component />
-</AicProvider>
-```
-
-## ServerSide
-
-### collectAicServerStore
-
-Allows you to automatically collect the redux store on the server side.
-
-```js
-await collectAicServerStore(RootComponent, store);
-```
-- `RootComponent` - component tree contains `useAicSelector` or `useAicThunkSelector` hooks;
-- `store` - redux store that needs to be initialized;
-
 
 ## Example
 

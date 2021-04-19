@@ -1,32 +1,33 @@
 import React from 'react';
 import ReactDOMServer from 'react-dom/server';
-import { AicCallbackCollectorContext } from '../context/aic-callback-collector-context';
+import { Provider } from 'react-redux';
+import { AicRequestQueueContext } from '../context/aic-request-queue-context';
+import { RequestQueue } from '../request-queue';
 
 const MAX_DEEP_REQUEST = 10;
 
-export const collectAicServerStore = async <S extends { dispatch: Function }>(
-  Component: React.ComponentType,
-  store: S
-) => {
-  const requestMap = new Map();
+interface IAicServerOptions {
+  store: any,
+  render: () => React.ReactElement,
+}
+
+export const collectAicServerStore = async (options: IAicServerOptions) => {
+  const { store, render } = options;
+  const requestQueue = new RequestQueue();
 
   for (let i = 0; i < MAX_DEEP_REQUEST; i++) {
     ReactDOMServer.renderToStaticMarkup(
-      <AicCallbackCollectorContext.Provider value={requestMap}>
-        <Component />
-      </AicCallbackCollectorContext.Provider>
+      <Provider store={store}>
+        <AicRequestQueueContext.Provider value={requestQueue}>
+          {render()}
+        </AicRequestQueueContext.Provider>
+      </Provider>
     );
 
-    if (!requestMap.size) {
+    if (!requestQueue.collectorMap.size) {
       return;
     }
 
-    await Promise.all(
-      Array.from(requestMap.keys()).map((service) => {
-        return store.dispatch({ service, ...requestMap.get(service) });
-      })
-    );
-
-    requestMap.clear();
+    await requestQueue.runRequests();
   }
 };

@@ -1,7 +1,7 @@
 const testFolderPath = (folderName) =>
   `<rootDir>/test/${folderName}/**/*.ts(x)`;
 
-const NORMAL_TEST_FOLDERS = ['hooks'];
+const NORMAL_TEST_FOLDERS = ['hooks', 'utils'];
 
 module.exports = {
   preset: 'ts-jest',
