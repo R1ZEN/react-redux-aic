@@ -1,9 +1,10 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useLayoutEffect } from 'react';
 import {
   aicStore,
   aicStoreCleanCallbacks,
   aicStoreUpdateInProgress,
 } from '../store/aic-store';
+import { isServer } from '../is-server';
 
 // @ts-ignore
 export const AicProvider: React.FC = ({ children }) => {
@@ -28,13 +29,15 @@ export const AicProvider: React.FC = ({ children }) => {
     aicStoreUpdateInProgress(false);
   }, []);
 
-  useEffect(() => {
-    const unsubscribe = aicStore.subscribe(subscribe);
+  if (!isServer) {
+    useLayoutEffect(() => {
+      const unsubscribe = aicStore.subscribe(subscribe);
 
-    return () => {
-      unsubscribe();
-    };
-  }, []);
+      return () => {
+        unsubscribe();
+      };
+    }, []);
+  }
 
   return children;
 };

@@ -70,7 +70,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { applyMiddleware, createStore } from 'redux';
 import { Provider } from 'react-redux';
-import { AicRootProvider, useAicThunkSelector } from '@pbe/react-redux-aic';
+import { AicProvider, useAicThunkSelector } from '@pbe/react-redux-aic';
 import thunk from 'redux-thunk';
 
 const reducer = (state = {}, action) => ({ ...state, ...action.state });
@@ -114,9 +114,9 @@ const PostTitle = () => {
 const rootElement = document.getElementById("root");
 ReactDOM.render(
   <Provider store={store}>
-    <AicRootProvider>
+    <AicProvider>
       <PostTitle />
-    </AicRootProvider>
+    </AicProvider>
   </Provider>,
   rootElement
 );

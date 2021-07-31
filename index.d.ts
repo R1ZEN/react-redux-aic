@@ -1,3 +1,5 @@
+import React from 'react';
+
 export function useAicSelector<
   TState,
   TSelected,
@@ -25,3 +27,5 @@ export function useAicThunkSelector<
 ): TSelected;
 
 export function useAicCallbackInProgress(callback: Function): boolean;
+
+export const AicProvider: React.FC;
