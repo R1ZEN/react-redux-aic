@@ -1,6 +1,6 @@
 {
   "name": "@pbe/react-redux-aic",
-  "version": "1.1.3",
+  "version": "1.2.3",
   "license": "MIT",
   "private": false,
   "description": "Wrapper for redux useSelector that allows automatically initialize component with server data",
@@ -35,8 +35,10 @@
   "typings": "index.d.ts",
   "sideEffects": false,
   "scripts": {
-    "dev": "NODE_ENV=development rollup -cw",
-    "build": "NODE_ENV=production rollup -c",
+    "p:dev": "NODE_ENV=development rollup -cw",
+    "p:build": "NODE_ENV=production rollup -c",
+    "p:clean": "rm -rf ./dist",
+    "p:publish": "npm run p:clean && npm run p:build && npm publish --access public",
     "test": "jest"
   },
   "peerDependencies": {
