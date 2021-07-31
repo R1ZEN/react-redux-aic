@@ -16,11 +16,11 @@ npm install -D @pbe/react-redux-aic
 
 ## Motivation
 
-In most projects, data requests are made from the nearest common component, but when you need to reuse a component, you have to look for its dependencies in order to repeat the initialization behavior on another page. This library is designed to solve this problem.
+In most projects, data requests are made from the nearest common component, but when you need to reuse a component, you have to look for its dependencies in order to repeat the initialization behavior on another page or view. This library is designed to solve this problem.
 
 ## Solution
 
-To solve this problem, it was decided to make a hook that would link data and requests, thus, when transferring the automotic component, requests are launched to initialize the component with server data.
+To solve this problem, it was decided to make a hook that would link data and requests, so that when rendering the component tree, we knew about all the requests needed to initialize the component tree.
 
 ## API
 
@@ -34,7 +34,7 @@ To solve this problem, it was decided to make a hook that would link data and re
 AicProvider works on the client side, calls a callback, must be located at the root of the component tree.
 
 ```jsx
-<Provider>
+<Provider store={store}>
   <AicProvider>
     {children}
   </AicProvider>
