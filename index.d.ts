@@ -1,6 +1,3 @@
-import React from 'react';
-import { Store } from 'redux';
-
 export function useAicSelector<
   TState,
   TSelected,
@@ -27,13 +24,4 @@ export function useAicThunkSelector<
   callbackParams: TCallbackParams
 ): TSelected;
 
-export function useAicInProgress(): boolean;
-
-interface IAicServerOptions {
-  store: Store;
-  render: () => React.ReactElement;
-}
-
-export function collectAicServerStore(
-  options: IAicServerOptions
-): Promise<void>;
+export function useAicCallbackInProgress(callback: Function): boolean;

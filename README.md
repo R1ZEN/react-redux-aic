@@ -24,10 +24,22 @@ To solve this problem, it was decided to make a hook that would link data and re
 
 ## API
 
+- [AicProvider](#aicprovider)
 - [Hooks](#hooks)
   - [useAicSelector](#useaicselector)
   - [useAicThunkSelector](#useaicthunkselector)
-  - [useAicInProgress](#useaicinprogress)
+
+## AicProvider
+
+AicProvider works on the client side, calls a callback, must be located at the root of the component tree.
+
+```jsx
+<Provider>
+  <AicProvider>
+    {children}
+  </AicProvider>
+</Provider>
+```
 
 ## Hooks
 
@@ -51,14 +63,6 @@ Same as `useAicSelector` but with `thunk` instead of callback.
 const value = useAicThunkSelector(selector, triggerSelector, thunk, thunkParams);
 ```
 
-### useAicInProgress
-
-Hook that lets you know if the aic is currently working.
-
-```js
-const inProgress = useAicInProgress();
-```
-
 ## Example
 
 ```jsx
@@ -66,7 +70,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { applyMiddleware, createStore } from 'redux';
 import { Provider } from 'react-redux';
-import { useAicThunkSelector } from '@pbe/react-redux-aic';
+import { AicRootProvider, useAicThunkSelector } from '@pbe/react-redux-aic';
 import thunk from 'redux-thunk';
 
 const reducer = (state = {}, action) => ({ ...state, ...action.state });
@@ -107,11 +111,14 @@ const PostTitle = () => {
   );
 };
 
+const rootElement = document.getElementById("root");
 ReactDOM.render(
   <Provider store={store}>
-    <PostTitle />
+    <AicRootProvider>
+      <PostTitle />
+    </AicRootProvider>
   </Provider>,
-  document.body
+  rootElement
 );
 ```
 
